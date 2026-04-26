@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: adv-rag-eval
-Version: 0.1.0
+Version: 0.1.2
 Summary: A standalone, zero-cost RAG hallucination evaluator.
 Author: Bhavya Shah
 Requires-Python: >=3.8
@@ -14,17 +14,35 @@ Dynamic: requires-dist
 Dynamic: requires-python
 Dynamic: summary
 
-# Adversarial RAG Evaluator (adv-rag-eval)
+# Adversarial RAG Evaluator (`adv-rag-eval`)
 
-A fully local, zero-cost Python library to evaluate RAG pipelines for hallucinations. 
-Powered by a custom fine-tuned Llama-3 model.
+A fully local, zero-cost, privacy-first Python library to evaluate Retrieval-Augmented Generation (RAG) pipelines for hallucinations. 
 
-## Installation
-`pip install adv-rag-eval`
+Instead of paying for expensive cloud APIs (like GPT-4) to judge your AI outputs, `adv-rag-eval` downloads a proprietary, fine-tuned **Llama-3-8B** model directly to your machine. It runs completely offline using `llama-cpp-python`, ensuring your enterprise data never leaves your local environment.
 
-## Usage
-```python
-from adv_rag_eval import evaluate_answer
+## Features
+* **100% Local & Private:** No API keys, no data sent to OpenAI or Anthropic.
+* **Edge-Optimized:** Compressed to a 4.9GB GGUF file. Runs smoothly on consumer laptops (RTX 3050, Mac M-series, or even pure CPU).
+* **Auto-Provisioning:** Automatically downloads and caches the inference engine from Hugging Face on the very first run.
+* **Surgical Detection:** Specifically fine-tuned on synthetic adversarial datasets to catch the three most dangerous RAG failure modes.
 
-result = evaluate_answer("Context here...", "Answer here...")
-print(result)
+---
+
+## Installation (No C++ Build Tools Required!)
+
+Because this library relies on a highly optimized C++ inference engine, standard installation might throw compiler errors on Windows. To bypass this, install the pre-compiled engine for your specific hardware first:
+
+**For standard laptops (CPU Only):**
+```bash
+pip install llama-cpp-python --no-cache-dir --only-binary llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+pip install adv-rag-eval
+
+**For Windows/Linux with Nvidia GPUs (CUDA 12.2):**
+```bash
+pip install llama-cpp-python --no-cache-dir --only-binary llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu122
+pip install adv-rag-eval
+
+**For Mac (Metal / Apple Silicon):**
+```bash
+CMAKE_ARGS="-DGGML_METAL=on" pip install llama-cpp-python
+pip install adv-rag-eval
