@@ -1,11 +1,30 @@
 Metadata-Version: 2.4
 Name: adv-rag-eval
 Version: 0.1.0
-Summary: A local, zero-cost RAG hallucination evaluator powered by Ollama.
+Summary: A standalone, zero-cost RAG hallucination evaluator.
 Author: Bhavya Shah
 Requires-Python: >=3.8
-Requires-Dist: ollama>=0.1.0
+Description-Content-Type: text/markdown
+Requires-Dist: llama-cpp-python>=0.2.56
+Requires-Dist: huggingface-hub>=0.20.0
 Dynamic: author
+Dynamic: description
+Dynamic: description-content-type
 Dynamic: requires-dist
 Dynamic: requires-python
 Dynamic: summary
+
+# Adversarial RAG Evaluator (adv-rag-eval)
+
+A fully local, zero-cost Python library to evaluate RAG pipelines for hallucinations. 
+Powered by a custom fine-tuned Llama-3 model.
+
+## Installation
+`pip install adv-rag-eval`
+
+## Usage
+```python
+from adv_rag_eval import evaluate_answer
+
+result = evaluate_answer("Context here...", "Answer here...")
+print(result)
