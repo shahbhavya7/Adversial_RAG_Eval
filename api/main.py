@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from fastapi import FastAPI, HTTPException, Depends, Security
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi.security.api_key import APIKeyHeader
 from pydantic import BaseModel
 
@@ -70,3 +71,6 @@ async def evaluate(request: EvaluationRequest, api_key: str = Depends(verify_api
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
+
+# Serve the production React frontend
+app.mount("/", StaticFiles(directory="dist", html=True), name="static")
