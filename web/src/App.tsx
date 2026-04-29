@@ -33,11 +33,15 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer sk-adv-rag-eval-enterprise-777'
         },
         body: JSON.stringify({ context, answer }),
       });
 
       if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error("Access Denied: Invalid API Key");
+        }
         throw new Error(`Server returned status: ${response.status}`);
       }
 

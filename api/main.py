@@ -7,8 +7,9 @@ os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 # Add the parent directory to sys.path so we can import adv_rag_eval regardless of where uvicorn is started
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, Security
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security.api_key import APIKeyHeader
 from pydantic import BaseModel
 
 # Import the local evaluation library
@@ -40,8 +41,22 @@ class EvaluationRequest(BaseModel):
     context: str
     answer: str
 
+SECRET_API_KEY = "sk-adv-rag-eval-enterprise-777"
+api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
+
+async def verify_api_key(api_key: str = Security(api_key_header)):
+    if not api_key:
+        raise HTTPException(status_code=403, detail="Access Denied: Invalid API Key")
+    
+    if api_key.startswith("Bearer "):
+        api_key = api_key.replace("Bearer ", "", 1)
+        
+    if api_key != SECRET_API_KEY:
+        raise HTTPException(status_code=403, detail="Access Denied: Invalid API Key")
+    return api_key
+
 @app.post("/evaluate")
-async def evaluate(request: EvaluationRequest):
+async def evaluate(request: EvaluationRequest, api_key: str = Depends(verify_api_key)):
     """
     Evaluates the given answer against the context.
     """
