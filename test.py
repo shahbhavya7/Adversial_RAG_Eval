@@ -1,53 +1,50 @@
 import requests
 import json
+import time
 
-# Your Live Cloud Engine
 API_URL = "http://adv-rag-eval-bhavya.eastus.azurecontainer.io:8000/evaluate"
-API_KEY = "sk-adv-rag-eval-enterprise-777"
+HEADERS = {"Authorization": "Bearer sk-adv-rag-eval-enterprise-777"}
 
-headers = {
-    "Authorization": f"Bearer {API_KEY}",
-    "Content-Type": "application/json"
-}
-
-# Simulating a company's RAG Pipeline outputs
-rag_tests = [
+stress_cases = [
     {
-        "scenario": "✅ Case 1: The Perfect Match",
-        "retrieved_context": "The company Q3 earnings report states that revenue grew by 12% to $1.4 billion. The growth was primarily driven by the enterprise software division.",
-        "llm_answer": "In Q3, the company saw a 12% revenue increase, reaching $1.4 billion, largely thanks to their enterprise software division."
+        "name": "🏢 Case 7: The Legal Jargon Test",
+        "context": "Pursuant to Section 4.2 of the Master Service Agreement, the Indemnification Clause shall only be triggered upon a breach of confidentiality exceeding $500,000 in damages.",
+        "answer": "If you leak data and it costs $600,000, the indemnification clause kicks in.",
+        "expected": "PASS (Supported)"
     },
     {
-        "scenario": "🚨 Case 2: The Sneaky Hallucination (Feature Addition)",
-        "retrieved_context": "The new Sentinel X smartwatch features heart rate tracking, a 3-day battery life, and water resistance up to 50 meters. It retails for $249.",
-        "llm_answer": "The Sentinel X is a $249 smartwatch that tracks your heart rate, has a 3-day battery, and includes built-in GPS for running."
+        "name": "📑 Case 8: The Table/List Format Test",
+        "context": "Product Inventory: \n- SKU-101: 50 units\n- SKU-102: 15 units\n- SKU-103: 0 units (Out of stock)",
+        "answer": "We currently have 50 units of SKU-101 and 15 units of SKU-103 available.",
+        "expected": "FAIL (Entity Swap or Numerical Drift - SKU-103 is out of stock)"
+    },
+    {
+        "name": "🔄 Case 9: The Date Flip",
+        "context": "The conference was moved from July 15th to August 20th due to venue availability issues.",
+        "answer": "The conference is happening on July 15th because the venue was available.",
+        "expected": "FAIL (Direct Contradiction)"
     }
 ]
 
-print("🚀 Starting Enterprise RAG Evaluation Test...\n")
-
-for test in rag_tests:
-    print(f"Running {test['scenario']}...")
-    
-    # Construct the exact JSON your API expects
-    payload = {
-        "context": test["retrieved_context"],
-        "answer": test["llm_answer"]
-    }
-    
-    try:
-        # Pinging your Azure Cloud!
-        response = requests.post(API_URL, json=payload, headers=headers)
+def run_stress_test():
+    print("🚀 Starting Enterprise API Stress Test...\n")
+    for case in stress_cases:
+        print(f"Testing {case['name']}...")
+        payload = {
+            "context": case["context"],
+            "answer": case["answer"]
+        }
+        
+        start_time = time.time()
+        response = requests.post(API_URL, json=payload, headers=HEADERS)
+        latency = round(time.time() - start_time, 2)
         
         if response.status_code == 200:
-            result = response.json()
-            # Print the formatted JSON response from your engine
-            print(json.dumps(result, indent=2))
+            print(f"✅ Success ({latency}s)")
+            print(json.dumps(response.json(), indent=2))
         else:
-            print(f"Failed! Status Code: {response.status_code}")
-            print(response.text)
-            
-    except Exception as e:
-        print(f"Connection Error: {e}")
-        
-    print("-" * 50 + "\n")
+            print(f"❌ Failed: {response.status_code} - {response.text}")
+        print("-" * 50)
+
+if __name__ == "__main__":
+    run_stress_test()

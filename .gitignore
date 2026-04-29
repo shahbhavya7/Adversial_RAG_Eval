@@ -1,3 +1,4 @@
 /.env
 # Ignore local model binaries
 models/*.gguf
+__pycache__/
